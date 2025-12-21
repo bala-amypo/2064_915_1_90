@@ -1,9 +1,4 @@
-package com.example.demo.serviceImpl;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.stereotype.Service;
+package com.example.demo.service.impl;
 
 import com.example.demo.model.Ticket;
 import com.example.demo.model.User;
@@ -12,68 +7,64 @@ import com.example.demo.repository.TicketRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketService;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class TicketServiceImpl implements TicketService {
 
-    private final TicketRepository ticketRepository;
-    private final UserRepository userRepository;
-    private final TicketCategoryRepository categoryRepository;
+    private final TicketRepository ticketRepo;
+    private final UserRepository userRepo;
+    private final TicketCategoryRepository categoryRepo;
 
-    public TicketServiceImpl(
-            TicketRepository ticketRepository,
-            UserRepository userRepository,
-            TicketCategoryRepository categoryRepository) {
-
-        this.ticketRepository = ticketRepository;
-        this.userRepository = userRepository;
-        this.categoryRepository = categoryRepository;
+    public TicketServiceImpl(TicketRepository ticketRepo,
+                             UserRepository userRepo,
+                             TicketCategoryRepository categoryRepo) {
+        this.ticketRepo = ticketRepo;
+        this.userRepo = userRepo;
+        this.categoryRepo = categoryRepo;
     }
 
     @Override
     public Ticket createTicket(Long userId, Long categoryId, Ticket ticket) {
 
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        TicketCategory category = categoryRepository.findById(categoryId)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+        TicketCategory category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
         if (ticket.getSubject() == null || ticket.getSubject().isBlank()) {
-            throw new IllegalArgumentException("Subject cannot be blank");
+            throw new IllegalArgumentException("subject cannot be blank");
         }
 
         if (ticket.getDescription() == null || ticket.getDescription().length() < 10) {
-            throw new IllegalArgumentException("Description is too short");
+            throw new IllegalArgumentException("description must be at least 10 characters");
         }
+
+        if (ticket.getStatus() == null)
+            ticket.setStatus("OPEN");
 
         ticket.setUser(user);
         ticket.setCategory(category);
 
-        if (ticket.getStatus() == null) {
-            ticket.setStatus("OPEN");
-        }
-
-        if (ticket.getCreatedAt() == null) {
-            ticket.setCreatedAt(LocalDateTime.now());
-        }
-
-        return ticketRepository.save(ticket);
+        return ticketRepo.save(ticket);
     }
 
     @Override
-    public Ticket getTicket(Long ticketId) {
-        return ticketRepository.findById(ticketId)
-                .orElseThrow(() -> new RuntimeException("Ticket not found"));
+    public Ticket getTicket(Long id) {
+        return ticketRepo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("ticket not found"));
     }
 
     @Override
     public List<Ticket> getTicketsByUser(Long userId) {
-        return ticketRepository.findByUser_Id(userId);
+        return ticketRepo.findByUser_Id(userId);
     }
 
     @Override
     public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
+        return ticketRepo.findAll();
     }
 }

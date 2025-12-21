@@ -1,60 +1,45 @@
-package com.example.demo.serviceImpl;
-
-import java.time.LocalDateTime;
-import java.util.List;
-
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-import org.springframework.stereotype.Service;
+package com.example.demo.service.impl;
 
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+    private final UserRepository repo;
 
-    public UserServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public UserServiceImpl(UserRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public User registerUser(User user) {
 
-        if (userRepository.existsByEmail(user.getEmail())) {
-            throw new IllegalArgumentException("Email already exists");
+        if (repo.existsByEmail(user.getEmail())) {
+            throw new IllegalArgumentException("email already exists");
         }
 
         if (user.getPassword() == null || user.getPassword().length() < 8) {
-            throw new IllegalArgumentException("Password length must be at least 8");
+            throw new IllegalArgumentException("password must be minimum 8 characters");
         }
 
-        if (user.getRole() == null) {
-            user.setRole("USER");
-        }
+        if (user.getRole() == null) user.setRole("USER");
 
-        if (user.getCreatedAt() == null) {
-            user.setCreatedAt(LocalDateTime.now());
-        }
-
-        return userRepository.save(user);
+        return repo.save(user);
     }
 
     @Override
-    public User getUser(Long id) throws NotFoundException {
-        return userRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException());
-    }
-
-    @Override
-    public User getUserByEmail(String email) throws Throwable {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new NotFoundException());
+    public User getUser(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
     }
 
     @Override
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return repo.findAll();
     }
 }

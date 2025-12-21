@@ -1,45 +1,44 @@
-package com.example.demo.serviceImpl;
-
-import java.util.List;
-
-import org.springframework.data.crossstore.ChangeSetPersister.NotFoundException;
-import org.springframework.stereotype.Service;
+package com.example.demo.service.impl;
 
 import com.example.demo.model.DuplicateRule;
 import com.example.demo.repository.DuplicateRuleRepository;
 import com.example.demo.service.DuplicateRuleService;
+import com.example.demo.exception.ResourceNotFoundException;
+import org.springframework.stereotype.Service;
+import java.util.List;
 
 @Service
 public class DuplicateRuleServiceImpl implements DuplicateRuleService {
 
-    private final DuplicateRuleRepository ruleRepository;
+    private final DuplicateRuleRepository repo;
 
-    public DuplicateRuleServiceImpl(DuplicateRuleRepository ruleRepository) {
-        this.ruleRepository = ruleRepository;
+    public DuplicateRuleServiceImpl(DuplicateRuleRepository repo) {
+        this.repo = repo;
     }
 
     @Override
     public DuplicateRule createRule(DuplicateRule rule) {
 
-        if (ruleRepository.findByRuleName(rule.getRuleName()).isPresent()) {
-            throw new IllegalArgumentException("Rule already exists");
+        if (repo.findByRuleName(rule.getRuleName()).isPresent()) {
+            throw new IllegalArgumentException("rule already exists");
         }
 
-        if (rule.getThreshold() < 0.0 || rule.getThreshold() > 1.0) {
-            throw new IllegalArgumentException("Invalid threshold");
+        Double t = rule.getThreshold();
+        if (t == null || t < 0.0 || t > 1.0) {
+            throw new IllegalArgumentException("threshold must be between 0.0 and 1.0");
         }
 
-        return ruleRepository.save(rule);
+        return repo.save(rule);
     }
 
     @Override
     public List<DuplicateRule> getAllRules() {
-        return ruleRepository.findAll();
+        return repo.findAll();
     }
 
     @Override
-    public DuplicateRule getRule(Long id) throws NotFoundException {
-        return ruleRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException());
+    public DuplicateRule getRule(Long id) {
+        return repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Rule not found"));
     }
 }
