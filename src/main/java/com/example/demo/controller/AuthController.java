@@ -1,10 +1,11 @@
-import com.example.demo.dto.*;
-
+package com.example.demo.controller;
 
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.model.ApiResponse;
 import com.example.demo.model.AuthRequest;
 import com.example.demo.model.AuthResponse;
+
+
 import com.example.demo.model.User;
 import com.example.demo.service.UserService;
 
