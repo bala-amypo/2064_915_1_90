@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
-@Table(name = "ticket_categories")
+@Table(name="ticket_categories")
 public class TicketCategory {
 
     @Id
@@ -21,17 +21,37 @@ public class TicketCategory {
     @OneToMany(mappedBy = "category")
     private List<Ticket> tickets;
 
-    public TicketCategory() {}
+    public TicketCategory(){}
 
-    public TicketCategory(String categoryName, String description) {
+    public TicketCategory(String categoryName, String description){
         this.categoryName = categoryName;
         this.description = description;
     }
 
     @PrePersist
-    public void onCreate() {
+    public void onCreate(){
         this.createdAt = LocalDateTime.now();
     }
 
-    // getters & setters
+    // ---------- GETTERS & SETTERS ----------
+
+    public Long getId() { return id; }
+
+    public void setId(Long id) { this.id = id; }
+
+    public String getCategoryName() { return categoryName; }
+
+    public void setCategoryName(String categoryName) { this.categoryName = categoryName; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public LocalDateTime getCreatedAt() { return createdAt; }
+
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public List<Ticket> getTickets() { return tickets; }
+
+    public void setTickets(List<Ticket> tickets) { this.tickets = tickets; }
 }
