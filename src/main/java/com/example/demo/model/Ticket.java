@@ -34,8 +34,6 @@ public class Ticket {
         if(this.status == null) this.status = "OPEN";
     }
 
-    // ---------- GETTERS & SETTERS ----------
-
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }

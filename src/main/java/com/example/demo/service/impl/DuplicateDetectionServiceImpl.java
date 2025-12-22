@@ -18,7 +18,7 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
 
     @Override
     public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
-        // if you only want CRUD, we return empty list
+
         return List.of();
     }
 

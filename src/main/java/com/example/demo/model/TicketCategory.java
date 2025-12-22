@@ -33,8 +33,7 @@ public class TicketCategory {
         this.createdAt = LocalDateTime.now();
     }
 
-    // ---------- GETTERS & SETTERS ----------
-
+   
     public Long getId() { return id; }
 
     public void setId(Long id) { this.id = id; }
