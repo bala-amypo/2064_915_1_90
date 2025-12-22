@@ -8,19 +8,17 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    // Handle Not Found
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<String> handleNotFound(ResourceNotFoundException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
-    // Handle Validation Errors
+    
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleValidation(IllegalArgumentException ex) {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
-    // Handle Other Exceptions
     @ExceptionHandler(Exception.class)
     public ResponseEntity<String> handleGlobal(Exception ex) {
         return new ResponseEntity<>("Something went wrong: " + ex.getMessage(),

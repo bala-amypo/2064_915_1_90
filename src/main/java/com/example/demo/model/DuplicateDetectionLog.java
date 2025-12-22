@@ -28,7 +28,6 @@ public class DuplicateDetectionLog {
         this.detectedAt = LocalDateTime.now();
     }
 
-    // ---------- GETTERS & SETTERS ----------
 
     public Long getId() { return id; }
 
