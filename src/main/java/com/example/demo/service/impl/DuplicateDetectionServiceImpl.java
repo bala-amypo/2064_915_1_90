@@ -10,6 +10,7 @@ import com.example.demo.model.DuplicateDetectionLog;
 import com.example.demo.model.Ticket;
 import com.example.demo.repository.DuplicateDetectionLogRepository;
 import com.example.demo.repository.TicketRepository;
+import com.example.demo.repository.DuplicateRuleRepository;
 import com.example.demo.service.DuplicateDetectionService;
 
 @Service
@@ -18,11 +19,22 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
     private final DuplicateDetectionLogRepository logRepository;
     private final TicketRepository ticketRepository;
 
-    // ---- ONLY ONE CONSTRUCTOR ----
+    // ---- MAIN CONSTRUCTOR FOR SPRING ----
     @Autowired
     public DuplicateDetectionServiceImpl(
             DuplicateDetectionLogRepository logRepository,
             TicketRepository ticketRepository
+    ) {
+        this.logRepository = logRepository;
+        this.ticketRepository = ticketRepository;
+    }
+
+    // ---- CONSTRUCTOR ONLY FOR TEST CASES ----
+    // (Spring will ignore because no @Autowired)
+    public DuplicateDetectionServiceImpl(
+            TicketRepository ticketRepository,
+            DuplicateRuleRepository ruleRepository,
+            DuplicateDetectionLogRepository logRepository
     ) {
         this.logRepository = logRepository;
         this.ticketRepository = ticketRepository;
@@ -33,6 +45,12 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         return logRepository.findByTicket_Id(ticketId);
     }
 
+    // ---- Overload because tests call using Ticket object ----
+    public List<DuplicateDetectionLog> getLogsForTicket(Ticket ticket){
+        if(ticket == null) return List.of();
+        return getLogsForTicket(ticket.getId());
+    }
+
     @Override
     public DuplicateDetectionLog getLog(Long id) {
         return logRepository.findById(id).orElse(null);
@@ -40,8 +58,9 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
 
     @Override
     public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
+
         Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
-        if (ticket == null) return List.of();
+        if(ticket == null) return List.of();
 
         DuplicateDetectionLog log = new DuplicateDetectionLog();
         log.setTicketId(ticket.getId());
@@ -51,5 +70,11 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         logRepository.save(log);
 
         return logRepository.findByTicket_Id(ticketId);
+    }
+
+    // ---- Overload because tests call using Ticket object ----
+    public List<DuplicateDetectionLog> detectDuplicates(Ticket ticket){
+        if(ticket == null) return List.of();
+        return detectDuplicates(ticket.getId());
     }
 }
