@@ -1,9 +1,5 @@
 package com.example.demo.security;
 
-public class CustomUserDetailsService {
-    
-}package com.example.demo.security;
-
 import com.example.demo.model.User;
 import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +21,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .roles(user.getRole()) // Ensure role saved like ADMIN/USER
+                .roles(user.getRole())
                 .build();
     }
 }
