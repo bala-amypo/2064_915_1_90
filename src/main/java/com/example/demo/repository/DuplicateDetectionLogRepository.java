@@ -9,5 +9,11 @@ import java.util.List;
 @Repository
 public interface DuplicateDetectionLogRepository extends JpaRepository<DuplicateDetectionLog, Long> {
 
-    List<DuplicateDetectionLog> findByTicketId(long ticketId);  // 🔥 Correct
+    List<DuplicateDetectionLog> findByTicketId(long ticketId);
+
+    // 👇 Needed only for test cases
+    default List<DuplicateDetectionLog> findByTicket_Id(long ticketId) {
+        return findByTicketId(ticketId);
+    }
 }
+
