@@ -16,32 +16,40 @@ public class DuplicateDetectionLog {
     @ManyToOne
     private Ticket ticket2;
 
-    private double similarityScore;
+    private double matchScore;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime detectedAt = LocalDateTime.now();
 
-    // REQUIRED BY TESTS
-    public DuplicateDetectionLog() {
+    public DuplicateDetectionLog() {}
+
+    public DuplicateDetectionLog(Ticket t1, Ticket t2, double score) {
+        this.ticket1 = t1;
+        this.ticket2 = t2;
+        this.matchScore = score;
+        this.detectedAt = LocalDateTime.now();
     }
 
-    // ALSO REQUIRED BY TESTS
-    public DuplicateDetectionLog(Ticket ticket1, Ticket ticket2, double similarityScore) {
-        this.ticket1 = ticket1;
-        this.ticket2 = ticket2;
-        this.similarityScore = similarityScore;
+    public Long getId() {
+        return id;
     }
 
-    public Long getId() { return id; }
+    public Ticket getTicket1() {
+        return ticket1;
+    }
 
-    public Ticket getTicket1() { return ticket1; }
-    public void setTicket1(Ticket ticket1) { this.ticket1 = ticket1; }
+    public Ticket getTicket2() {
+        return ticket2;
+    }
 
-    public Ticket getTicket2() { return ticket2; }
-    public void setTicket2(Ticket ticket2) { this.ticket2 = ticket2; }
+    public double getMatchScore() {
+        return matchScore;
+    }
 
-    public double getSimilarityScore() { return similarityScore; }
-    public void setSimilarityScore(double similarityScore) { this.similarityScore = similarityScore; }
+    public void setMatchScore(double matchScore) {
+        this.matchScore = matchScore;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public LocalDateTime getDetectedAt() {
+        return detectedAt;
+    }
 }
