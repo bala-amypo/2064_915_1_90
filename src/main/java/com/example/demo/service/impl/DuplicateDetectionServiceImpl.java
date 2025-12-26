@@ -12,6 +12,12 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
     // REQUIRED CONSTRUCTOR - TESTS EXPECT THIS
     public DuplicateDetectionServiceImpl(DuplicateDetectionLogRepository duplicateDetectionLogRepository) {
         this.duplicateDetectionLogRepository = duplicateDetectionLogRepository;
+        @Override
+public com.example.demo.model.DuplicateDetectionLog getLog(Long id) {
+    return duplicateDetectionLogRepository.findById(id)
+            .orElse(null);
+}
+
     }
 
 }
