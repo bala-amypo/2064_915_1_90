@@ -10,6 +10,7 @@ import com.example.demo.model.DuplicateDetectionLog;
 import com.example.demo.model.Ticket;
 import com.example.demo.repository.DuplicateDetectionLogRepository;
 import com.example.demo.repository.TicketRepository;
+import com.example.demo.repository.DuplicateRuleRepository;
 import com.example.demo.service.DuplicateDetectionService;
 
 @Service
@@ -18,6 +19,11 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
     private final DuplicateDetectionLogRepository logRepository;
     private final TicketRepository ticketRepository;
 
+    /**
+     * =========
+     *  MAIN APP CONSTRUCTOR
+     * =========
+     */
     @Autowired
     public DuplicateDetectionServiceImpl(
             DuplicateDetectionLogRepository logRepository,
@@ -27,16 +33,48 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         this.ticketRepository = ticketRepository;
     }
 
-    @Override
-    public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
-        return logRepository.findByTicketId(ticketId);   // 🔥 FIXED
+    /**
+     * =========
+     *  REQUIRED ONLY FOR TEST CASES
+     *  The TestNG suite calls this constructor
+     * =========
+     */
+    @Autowired
+    public DuplicateDetectionServiceImpl(
+            TicketRepository ticketRepository,
+            DuplicateRuleRepository ruleRepository,     // not used, but required for tests
+            DuplicateDetectionLogRepository logRepository
+    ) {
+        this.logRepository = logRepository;
+        this.ticketRepository = ticketRepository;
     }
 
+    /**
+     * =========
+     *  Get logs of ticket
+     * =========
+     */
+    @Override
+    public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
+        // supports both our method + old test case call
+        return logRepository.findByTicketId(ticketId);
+    }
+
+    /**
+     * =========
+     *  Get single log
+     * =========
+     */
     @Override
     public DuplicateDetectionLog getLog(Long id) {
         return logRepository.findById(id).orElse(null);
     }
 
+    /**
+     * =========
+     *  Detect duplicates using ticketId
+     * =========
+     */
     @Override
     public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
@@ -48,6 +86,20 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         log.setDetectedAt(LocalDateTime.now());
 
         logRepository.save(log);
-        return logRepository.findByTicketId(ticketId);   // 🔥 FIXED
+
+        return logRepository.findByTicketId(ticketId);
+    }
+
+    /**
+     * =========
+     *  REQUIRED ONLY FOR TEST CASES
+     *  They call detectDuplicates(Ticket ticket)
+     * =========
+     */
+    public List<DuplicateDetectionLog> detectDuplicates(Ticket ticket) {
+        if (ticket == null || ticket.getId() == null) {
+            return List.of();
+        }
+        return detectDuplicates(ticket.getId());
     }
 }
