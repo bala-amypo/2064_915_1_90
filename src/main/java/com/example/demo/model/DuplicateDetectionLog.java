@@ -4,41 +4,45 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "duplicate_detection_logs")
 public class DuplicateDetectionLog {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    private Ticket ticket1;
+    // Ticket for which duplicate was checked
+    private Long ticketId;
 
-    @ManyToOne
-    private Ticket ticket2;
-
+    // Score of match
     private double matchScore;
 
-    private LocalDateTime detectedAt = LocalDateTime.now();
+    // When detection happened
+    private LocalDateTime detectedAt;
 
-    public DuplicateDetectionLog() {}
+    public DuplicateDetectionLog() {
+    }
 
-    public DuplicateDetectionLog(Ticket t1, Ticket t2, double score) {
-        this.ticket1 = t1;
-        this.ticket2 = t2;
-        this.matchScore = score;
-        this.detectedAt = LocalDateTime.now();
+    public DuplicateDetectionLog(Long ticketId, double matchScore, LocalDateTime detectedAt) {
+        this.ticketId = ticketId;
+        this.matchScore = matchScore;
+        this.detectedAt = detectedAt;
     }
 
     public Long getId() {
         return id;
     }
 
-    public Ticket getTicket1() {
-        return ticket1;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public Ticket getTicket2() {
-        return ticket2;
+    public Long getTicketId() {
+        return ticketId;
+    }
+
+    public void setTicketId(Long ticketId) {
+        this.ticketId = ticketId;
     }
 
     public double getMatchScore() {
@@ -51,5 +55,9 @@ public class DuplicateDetectionLog {
 
     public LocalDateTime getDetectedAt() {
         return detectedAt;
+    }
+
+    public void setDetectedAt(LocalDateTime detectedAt) {
+        this.detectedAt = detectedAt;
     }
 }
