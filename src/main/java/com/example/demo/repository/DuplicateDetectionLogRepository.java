@@ -2,18 +2,24 @@ package com.example.demo.repository;
 
 import com.example.demo.model.DuplicateDetectionLog;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-@Repository
 public interface DuplicateDetectionLogRepository extends JpaRepository<DuplicateDetectionLog, Long> {
 
-    List<DuplicateDetectionLog> findByTicketId(long ticketId);
+    /**
+     * Used by our application
+     */
+    List<DuplicateDetectionLog> findByTicketId(Long ticketId);
 
-    // 👇 Needed only for test cases
-    default List<DuplicateDetectionLog> findByTicket_Id(long ticketId) {
-        return findByTicketId(ticketId);
-    }
+
+    /**
+     * Required ONLY FOR TEST CASES
+     * They expect method name findByTicket_Id(long)
+     * Our entity does NOT have "ticket", so we map it manually
+     */
+    @Query("SELECT d FROM DuplicateDetectionLog d WHERE d.ticketId = :id")
+    List<DuplicateDetectionLog> findByTicket_Id(@Param("id") long id);
 }
-
