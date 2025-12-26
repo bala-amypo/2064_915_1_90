@@ -9,6 +9,5 @@ import java.util.List;
 @Repository
 public interface DuplicateDetectionLogRepository extends JpaRepository<DuplicateDetectionLog, Long> {
 
-    // FIXED — now matches entity field "ticketId"
-    List<DuplicateDetectionLog> findByTicketId(long ticketId);
+    List<DuplicateDetectionLog> findByTicketId(long ticketId);  // 🔥 Correct
 }
