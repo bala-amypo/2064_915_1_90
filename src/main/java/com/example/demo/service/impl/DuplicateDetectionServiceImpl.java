@@ -29,7 +29,7 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
 
     @Override
     public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
-        return logRepository.findByTicket_Id(ticketId);
+        return logRepository.findByTicketId(ticketId);   // 🔥 FIXED
     }
 
     @Override
@@ -48,6 +48,6 @@ public class DuplicateDetectionServiceImpl implements DuplicateDetectionService 
         log.setDetectedAt(LocalDateTime.now());
 
         logRepository.save(log);
-        return logRepository.findByTicket_Id(ticketId);
+        return logRepository.findByTicketId(ticketId);   // 🔥 FIXED
     }
 }
