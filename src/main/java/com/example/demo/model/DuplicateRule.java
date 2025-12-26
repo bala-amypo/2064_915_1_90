@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="duplicate_rules")
 public class DuplicateRule {
 
     @Id
@@ -13,33 +12,33 @@ public class DuplicateRule {
 
     private String ruleName;
     private String matchType;
-    private Double threshold;
-    private LocalDateTime createdAt;
+    private double threshold;
 
-    public DuplicateRule(){}
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @PrePersist
-    public void onCreate(){
-        this.createdAt = LocalDateTime.now();
+    // REQUIRED BY TESTS
+    public DuplicateRule() {
+    }
+
+    // ALSO REQUIRED BY TESTS
+    public DuplicateRule(String ruleName, String matchType, double threshold) {
+        this.ruleName = ruleName;
+        this.matchType = matchType;
+        this.threshold = threshold;
     }
 
     public Long getId() { return id; }
-
     public void setId(Long id) { this.id = id; }
 
     public String getRuleName() { return ruleName; }
-
     public void setRuleName(String ruleName) { this.ruleName = ruleName; }
 
     public String getMatchType() { return matchType; }
-
     public void setMatchType(String matchType) { this.matchType = matchType; }
 
-    public Double getThreshold() { return threshold; }
-
-    public void setThreshold(Double threshold) { this.threshold = threshold; }
+    public double getThreshold() { return threshold; }
+    public void setThreshold(double threshold) { this.threshold = threshold; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
-
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
