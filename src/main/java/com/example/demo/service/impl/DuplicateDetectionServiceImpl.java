@@ -10,16 +10,14 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DuplicateDetectionServiceImpl implements DuplicateDetectionService {
+public DuplicateDetectionServiceImpl(
+        DuplicateDetectionLogRepository logRepository,
+        TicketRepository ticketRepository
+) {
+    this.logRepository = logRepository;
+    this.ticketRepository = ticketRepository;
+}
 
-    private final DuplicateDetectionLogRepository logRepository;
-    private final TicketRepository ticketRepository;
-
-    public DuplicateDetectionServiceImpl(DuplicateDetectionLogRepository logRepository,
-                                         TicketRepository ticketRepository) {
-        this.logRepository = logRepository;
-        this.ticketRepository = ticketRepository;
-    }
 
     @Override
     public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
