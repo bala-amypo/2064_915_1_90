@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name="duplicate_detection_logs")
 public class DuplicateDetectionLog {
 
     @Id
@@ -12,40 +11,37 @@ public class DuplicateDetectionLog {
     private Long id;
 
     @ManyToOne
-    private Ticket ticket;
+    private Ticket ticket1;
 
     @ManyToOne
-    private Ticket matchedTicket;
+    private Ticket ticket2;
 
-    private Double matchScore;
+    private double similarityScore;
 
-    private LocalDateTime detectedAt;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public DuplicateDetectionLog(){}
-
-    @PrePersist
-    public void onCreate(){
-        this.detectedAt = LocalDateTime.now();
+    // REQUIRED BY TESTS
+    public DuplicateDetectionLog() {
     }
 
+    // ALSO REQUIRED BY TESTS
+    public DuplicateDetectionLog(Ticket ticket1, Ticket ticket2, double similarityScore) {
+        this.ticket1 = ticket1;
+        this.ticket2 = ticket2;
+        this.similarityScore = similarityScore;
+    }
 
     public Long getId() { return id; }
 
-    public void setId(Long id) { this.id = id; }
+    public Ticket getTicket1() { return ticket1; }
+    public void setTicket1(Ticket ticket1) { this.ticket1 = ticket1; }
 
-    public Ticket getTicket() { return ticket; }
+    public Ticket getTicket2() { return ticket2; }
+    public void setTicket2(Ticket ticket2) { this.ticket2 = ticket2; }
 
-    public void setTicket(Ticket ticket) { this.ticket = ticket; }
+    public double getSimilarityScore() { return similarityScore; }
+    public void setSimilarityScore(double similarityScore) { this.similarityScore = similarityScore; }
 
-    public Ticket getMatchedTicket() { return matchedTicket; }
-
-    public void setMatchedTicket(Ticket matchedTicket) { this.matchedTicket = matchedTicket; }
-
-    public Double getMatchScore() { return matchScore; }
-
-    public void setMatchScore(Double matchScore) { this.matchScore = matchScore; }
-
-    public LocalDateTime getDetectedAt() { return detectedAt; }
-
-    public void setDetectedAt(LocalDateTime detectedAt) { this.detectedAt = detectedAt; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }
