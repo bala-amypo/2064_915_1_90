@@ -8,33 +8,29 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/tickets")
 public class TicketController {
+    private final TicketService ticketService;
 
-    private final TicketService service;
-
-    public TicketController(TicketService service){
-        this.service = service;
+    public TicketController(TicketService ticketService) {
+        this.ticketService = ticketService;
     }
 
-    @PostMapping("/{userId}/{categoryId}")
-    public Ticket create(
-            @PathVariable Long userId,
-            @PathVariable Long categoryId,
-            @RequestBody Ticket ticket){
-        return service.createTicket(userId, categoryId, ticket);
+    @PostMapping
+    public Ticket createTicket(@RequestParam Long userId, @RequestParam Long categoryId, @RequestBody Ticket ticket) {
+        return ticketService.createTicket(userId, categoryId, ticket);
     }
 
     @GetMapping("/{id}")
-    public Ticket get(@PathVariable Long id){
-        return service.getTicket(id);
+    public Ticket getTicket(@PathVariable Long id) {
+        return ticketService.getTicket(id);
+    }
+
+    @GetMapping
+    public List<Ticket> getAllTickets() {
+        return ticketService.getAllTickets();
     }
 
     @GetMapping("/user/{userId}")
-    public List<Ticket> getByUser(@PathVariable Long userId){
-        return service.getTicketsByUser(userId);
-    }
-
-    @GetMapping("/all")
-    public List<Ticket> getAll(){
-        return service.getAllTickets();
+    public List<Ticket> getTicketsByUser(@PathVariable Long userId) {
+        return ticketService.getTicketsByUser(userId);
     }
 }
