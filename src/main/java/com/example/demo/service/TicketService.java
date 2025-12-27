@@ -9,7 +9,7 @@ public interface TicketService {
 
     Ticket getTicket(Long id);
 
-    List<Ticket> getTicketsByUser(Long userId);
-
     List<Ticket> getAllTickets();
+
+    List<Ticket> getTicketsByUser(Long userId);
 }
