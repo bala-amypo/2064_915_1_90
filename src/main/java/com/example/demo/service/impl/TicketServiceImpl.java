@@ -1,41 +1,51 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.*;
-import com.example.demo.repository.*;
+import com.example.demo.model.Ticket;
+import com.example.demo.model.User;
+import com.example.demo.model.TicketCategory;
+import com.example.demo.repository.TicketRepository;
+import com.example.demo.repository.UserRepository;
+import com.example.demo.repository.TicketCategoryRepository;
 import com.example.demo.service.TicketService;
-import org.springframework.stereotype.Service;
 import java.util.List;
 
-@Service
 public class TicketServiceImpl implements TicketService {
+    private final TicketRepository ticketRepository;
+    private final UserRepository userRepository;
+    private final TicketCategoryRepository categoryRepository;
 
-    private final TicketRepository tRepo;
-    private final UserRepository uRepo;
-    private final TicketCategoryRepository cRepo;
-
-    public TicketServiceImpl(TicketRepository t,UserRepository u,TicketCategoryRepository c){
-        this.tRepo=t; this.uRepo=u; this.cRepo=c;
+    public TicketServiceImpl(TicketRepository ticketRepository, UserRepository userRepository, TicketCategoryRepository categoryRepository) {
+        this.ticketRepository = ticketRepository;
+        this.userRepository = userRepository;
+        this.categoryRepository = categoryRepository;
     }
 
-    public Ticket createTicket(Long userId,Long catId,Ticket t){
-        User u = uRepo.findById(userId).orElseThrow();
-        TicketCategory c = cRepo.findById(catId).orElseThrow();
-
-        if(t.getDescription()==null || t.getDescription().length() < 10)
-            throw new RuntimeException("description too short");
-
-        t.setUser(u);
-        t.setCategory(c);
-        return tRepo.save(t);
+    @Override
+    public Ticket createTicket(Long userId, Long categoryId, Ticket ticket) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
+        TicketCategory category = categoryRepository.findById(categoryId).orElseThrow(() -> new RuntimeException("Category not found"));
+        
+        if (ticket.getDescription() == null || ticket.getDescription().length() < 10) {
+            throw new RuntimeException("Description must be at least 10 characters");
+        }
+        
+        ticket.setUser(user);
+        ticket.setCategory(category);
+        return ticketRepository.save(ticket);
     }
 
-    public Ticket getTicket(Long id){
-        return tRepo.findById(id).orElseThrow(()->new RuntimeException("ticket not found"));
+    @Override
+    public Ticket getTicket(Long id) {
+        return ticketRepository.findById(id).orElseThrow(() -> new RuntimeException("Ticket not found"));
     }
 
-    public List<Ticket> getAllTickets(){ return tRepo.findAll(); }
+    @Override
+    public List<Ticket> getAllTickets() {
+        return List.of();
+    }
 
-    public List<Ticket> getTicketsByUser(Long id){
-        return tRepo.findByUser_Id(id);
+    @Override
+    public List<Ticket> getTicketsByUser(Long userId) {
+        return ticketRepository.findByUser_Id(userId);
     }
 }

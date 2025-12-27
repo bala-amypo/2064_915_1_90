@@ -4,69 +4,70 @@ import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DuplicateDetectionService;
 import com.example.demo.util.TextSimilarityUtil;
-import org.springframework.stereotype.Service;
 import java.util.*;
 
-@Service
 public class DuplicateDetectionServiceImpl implements DuplicateDetectionService {
+    private final TicketRepository ticketRepository;
+    private final DuplicateRuleRepository ruleRepository;
+    private final DuplicateDetectionLogRepository logRepository;
 
-    private final TicketRepository ticketRepo;
-    private final DuplicateRuleRepository ruleRepo;
-    private final DuplicateDetectionLogRepository logRepo;
-
-    public DuplicateDetectionServiceImpl(TicketRepository t, DuplicateRuleRepository r, DuplicateDetectionLogRepository l){
-        this.ticketRepo=t; this.ruleRepo=r; this.logRepo=l;
+    public DuplicateDetectionServiceImpl(TicketRepository ticketRepository, DuplicateRuleRepository ruleRepository, DuplicateDetectionLogRepository logRepository) {
+        this.ticketRepository = ticketRepository;
+        this.ruleRepository = ruleRepository;
+        this.logRepository = logRepository;
     }
 
-    public List<DuplicateDetectionLog> getLogsForTicket(Long id){
-        return logRepo.findByTicket_Id(id);
-    }
+    @Override
+    public List<Object> detectDuplicates(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId).orElseThrow(() -> new RuntimeException("Ticket not found"));
+        List<DuplicateRule> rules = ruleRepository.findAll();
+        List<Ticket> openTickets = ticketRepository.findByStatus("OPEN");
+        List<Object> duplicates = new ArrayList<>();
 
-    public DuplicateDetectionLog getLog(Long id){
-        return logRepo.findById(id).orElse(null);
-    }
+        if (rules.isEmpty()) return duplicates;
 
-    public List<DuplicateDetectionLog> detectDuplicates(Long ticketId){
-        Ticket base = ticketRepo.findById(ticketId).orElse(null);
-        if(base==null) return List.of();
+        for (Ticket otherTicket : openTickets) {
+            if (Objects.equals(otherTicket.getId(), ticketId)) continue;
 
-        List<DuplicateRule> rules = ruleRepo.findAll();
-        if(rules.isEmpty()) return List.of();
-
-        List<Ticket> open = ticketRepo.findByStatus("OPEN");
-        List<DuplicateDetectionLog> result = new ArrayList<>();
-
-        for(Ticket t : open){
-            if(t.getId()!=null && t.getId().equals(ticketId)) continue;
-
-            for(DuplicateRule r : rules){
+            for (DuplicateRule rule : rules) {
+                boolean isDuplicate = false;
                 double score = 0.0;
 
-                switch(r.getMatchType()){
-                    case "EXACT_MATCH" ->
-                            score = base.getSubject()!=null && t.getSubject()!=null &&
-                                    base.getSubject().equalsIgnoreCase(t.getSubject()) ? 1.0 : 0.0;
-
-                    case "KEYWORD" ->
-                            score = TextSimilarityUtil.similarity(
-                                    base.getSubject()+" "+base.getDescription(),
-                                    t.getSubject()+" "+t.getDescription()
-                            );
-
-                    case "SIMILARITY" ->
-                            score = TextSimilarityUtil.similarity(
-                                    base.getDescription(),t.getDescription()
-                            );
+                switch (rule.getMatchType()) {
+                    case "EXACT_MATCH":
+                        if (ticket.getSubject() != null && otherTicket.getSubject() != null) {
+                            isDuplicate = ticket.getSubject().equalsIgnoreCase(otherTicket.getSubject());
+                            score = isDuplicate ? 1.0 : 0.0;
+                        }
+                        break;
+                    case "KEYWORD":
+                        String text1 = (ticket.getSubject() + " " + ticket.getDescription()).toLowerCase();
+                        String text2 = (otherTicket.getSubject() + " " + otherTicket.getDescription()).toLowerCase();
+                        score = TextSimilarityUtil.similarity(text1, text2);
+                        isDuplicate = score >= rule.getThreshold();
+                        break;
+                    case "SIMILARITY":
+                        String desc1 = ticket.getDescription() != null ? ticket.getDescription() : "";
+                        String desc2 = otherTicket.getDescription() != null ? otherTicket.getDescription() : "";
+                        score = TextSimilarityUtil.similarity(desc1, desc2);
+                        isDuplicate = score >= rule.getThreshold();
+                        break;
                 }
 
-                if(score >= r.getThreshold()){
-                    DuplicateDetectionLog log = new DuplicateDetectionLog(base,t,score);
-                    logRepo.save(log);
-                    result.add(log);
+                if (isDuplicate) {
+                    duplicates.add(otherTicket);
+                    DuplicateDetectionLog log = new DuplicateDetectionLog(ticket, otherTicket, score);
+                    logRepository.save(log);
+                    break;
                 }
             }
         }
 
-        return result;
+        return duplicates;
+    }
+
+    @Override
+    public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
+        return logRepository.findByTicket_Id(ticketId);
     }
 }
