@@ -4,8 +4,10 @@ import com.example.demo.model.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.DuplicateDetectionService;
 import com.example.demo.util.TextSimilarityUtil;
+import org.springframework.stereotype.Service;
 import java.util.*;
 
+@Service
 public class DuplicateDetectionServiceImpl implements DuplicateDetectionService {
     private final TicketRepository ticketRepository;
     private final DuplicateRuleRepository ruleRepository;
