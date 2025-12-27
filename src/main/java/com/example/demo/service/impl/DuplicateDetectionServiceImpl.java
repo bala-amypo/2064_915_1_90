@@ -1,106 +1,72 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.model.DuplicateDetectionLog;
-import com.example.demo.model.DuplicateRule;
-import com.example.demo.model.Ticket;
-import com.example.demo.repository.DuplicateDetectionLogRepository;
-import com.example.demo.repository.DuplicateRuleRepository;
-import com.example.demo.repository.TicketRepository;
+import com.example.demo.model.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.DuplicateDetectionService;
 import com.example.demo.util.TextSimilarityUtil;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class DuplicateDetectionServiceImpl implements DuplicateDetectionService {
 
-    private final TicketRepository ticketRepository;
-    private final DuplicateRuleRepository ruleRepository;
-    private final DuplicateDetectionLogRepository logRepository;
+    private final TicketRepository ticketRepo;
+    private final DuplicateRuleRepository ruleRepo;
+    private final DuplicateDetectionLogRepository logRepo;
 
-    // ⚠️ MUST MATCH TEST CONSTRUCTOR SIGNATURE
-    public DuplicateDetectionServiceImpl(
-            TicketRepository ticketRepository,
-            DuplicateRuleRepository ruleRepository,
-            DuplicateDetectionLogRepository logRepository
-    ) {
-        this.ticketRepository = ticketRepository;
-        this.ruleRepository = ruleRepository;
-        this.logRepository = logRepository;
+    public DuplicateDetectionServiceImpl(TicketRepository t, DuplicateRuleRepository r, DuplicateDetectionLogRepository l){
+        this.ticketRepo=t; this.ruleRepo=r; this.logRepo=l;
     }
 
-    @Override
-    public List<DuplicateDetectionLog> getLogsForTicket(Long ticketId) {
-        return logRepository.findByTicket_Id(ticketId);
+    public List<DuplicateDetectionLog> getLogsForTicket(Long id){
+        return logRepo.findByTicket_Id(id);
     }
 
-    @Override
-    public DuplicateDetectionLog getLog(Long id) {
-        return logRepository.findById(id).orElse(null);
+    public DuplicateDetectionLog getLog(Long id){
+        return logRepo.findById(id).orElse(null);
     }
 
-    @Override
-    public List<DuplicateDetectionLog> detectDuplicates(Long ticketId) {
+    public List<DuplicateDetectionLog> detectDuplicates(Long ticketId){
+        Ticket base = ticketRepo.findById(ticketId).orElse(null);
+        if(base==null) return List.of();
 
-        Ticket base = ticketRepository.findById(ticketId).orElse(null);
-        if (base == null) return List.of();
+        List<DuplicateRule> rules = ruleRepo.findAll();
+        if(rules.isEmpty()) return List.of();
 
-        List<DuplicateRule> rules = ruleRepository.findAll();
-        if (rules.isEmpty()) return List.of();
+        List<Ticket> open = ticketRepo.findByStatus("OPEN");
+        List<DuplicateDetectionLog> result = new ArrayList<>();
 
-        List<Ticket> openTickets = ticketRepository.findByStatus("OPEN");
+        for(Ticket t : open){
+            if(t.getId()!=null && t.getId().equals(ticketId)) continue;
 
-        List<DuplicateDetectionLog> results = new ArrayList<>();
-
-        for (Ticket other : openTickets) {
-
-            // skip itself
-            if (other.getId() != null && other.getId().equals(ticketId)) continue;
-
-            for (DuplicateRule rule : rules) {
-
+            for(DuplicateRule r : rules){
                 double score = 0.0;
 
-                String type = rule.getMatchType();
-                double threshold = rule.getThreshold();
+                switch(r.getMatchType()){
+                    case "EXACT_MATCH" ->
+                            score = base.getSubject()!=null && t.getSubject()!=null &&
+                                    base.getSubject().equalsIgnoreCase(t.getSubject()) ? 1.0 : 0.0;
 
-                String baseText = (base.getSubject() + " " + base.getDescription()).toLowerCase();
-                String otherText = (other.getSubject() + " " + other.getDescription()).toLowerCase();
+                    case "KEYWORD" ->
+                            score = TextSimilarityUtil.similarity(
+                                    base.getSubject()+" "+base.getDescription(),
+                                    t.getSubject()+" "+t.getDescription()
+                            );
 
-                switch (type) {
-
-                    case "EXACT_MATCH":
-                        score = base.getSubject() != null &&
-                                other.getSubject() != null &&
-                                base.getSubject().equalsIgnoreCase(other.getSubject())
-                                ? 1.0 : 0.0;
-                        break;
-
-                    case "KEYWORD":
-                        score = TextSimilarityUtil.similarity(baseText, otherText);
-                        break;
-
-                    case "SIMILARITY":
-                        score = TextSimilarityUtil.similarity(baseText, otherText);
-                        break;
+                    case "SIMILARITY" ->
+                            score = TextSimilarityUtil.similarity(
+                                    base.getDescription(),t.getDescription()
+                            );
                 }
 
-                if (score >= threshold) {
-
-                    DuplicateDetectionLog log =
-                            new DuplicateDetectionLog(base, other, score);
-
-                    log.setDetectedAt(LocalDateTime.now());
-
-                    logRepository.save(log);
-                    results.add(log);
+                if(score >= r.getThreshold()){
+                    DuplicateDetectionLog log = new DuplicateDetectionLog(base,t,score);
+                    logRepo.save(log);
+                    result.add(log);
                 }
             }
         }
 
-        return results;
+        return result;
     }
 }
