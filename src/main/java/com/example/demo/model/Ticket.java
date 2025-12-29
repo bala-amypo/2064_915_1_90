@@ -12,35 +12,77 @@ public class Ticket {
     private Long id;
 
     private String subject;
-    private String description;
-    private String status;   // OPEN / CLOSED / DUPLICATE
-    private String studentId;
 
+    @Column(columnDefinition = "TEXT")
+    private String description;
+
+    private String status = "OPEN";
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    // ---------------- USER RELATION ----------------
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    private LocalDateTime createdAt = LocalDateTime.now();
+    // ---------------- CATEGORY RELATION ----------------
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private TicketCategory category;
 
+    // ------------ CONSTRUCTORS ------------
     public Ticket() {}
 
-    // ===== GETTERS & SETTERS =====
-    public Long getId() { return id; }
+    public Ticket(String subject, String description) {
+        this.subject = subject;
+        this.description = description;
+    }
 
-    public String getSubject() { return subject; }
-    public void setSubject(String subject) { this.subject = subject; }
+    // ------------ GETTERS & SETTERS ------------
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public Long getId() {
+        return id;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public String getSubject() {
+        return subject;
+    }
+    public void setSubject(String subject) {
+        this.subject = subject;
+    }
 
-    public String getStudentId() { return studentId; }
-    public void setStudentId(String studentId) { this.studentId = studentId; }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
 
-    public User getUser() { return user; }
-    public void setUser(User user) { this.user = user; }
+    public String getStatus() {
+        return status;
+    }
+    public void setStatus(String status) {
+        this.status = status;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    // ---- USER ----
+    public User getUser() {
+        return user;
+    }
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    // ---- CATEGORY ----
+    public TicketCategory getCategory() {
+        return category;
+    }
+    public void setCategory(TicketCategory category) {
+        this.category = category;
+    }
 }
