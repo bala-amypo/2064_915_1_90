@@ -10,9 +10,7 @@ public class TicketCategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
-
+    private String name;     // category name
     private String description;
 
     public TicketCategory() {}
@@ -22,22 +20,33 @@ public class TicketCategory {
         this.description = description;
     }
 
-    // -------- GETTERS & SETTERS --------
+    // Getters & Setters
     public Long getId() {
         return id;
     }
 
-    public String getName() {
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getName() {        // <-- important
         return name;
     }
+
     public void setName(String name) {
         this.name = name;
     }
 
-    public String getDescription() {
+    public String getDescription() { 
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    // If service expects getCategoryName(), we add support too
+    public String getCategoryName() {
+        return name;
     }
 }
