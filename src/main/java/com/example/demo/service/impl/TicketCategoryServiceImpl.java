@@ -18,16 +18,13 @@ public class TicketCategoryServiceImpl implements TicketCategoryService {
 
     @Override
     public TicketCategory createCategory(TicketCategory category) {
-
-        // Prevent duplicate names
-        List<TicketCategory> existing = categoryRepository.findAll();
-        for (TicketCategory c : existing) {
-            if (c.getName().equalsIgnoreCase(category.getName())) {
-                return c; // already exists
-            }
-        }
-
         return categoryRepository.save(category);
+    }
+
+    @Override
+    public TicketCategory getCategory(Long id) {
+        return categoryRepository.findById(id)
+                .orElse(null);
     }
 
     @Override
